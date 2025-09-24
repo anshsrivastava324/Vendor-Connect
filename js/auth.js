@@ -25,14 +25,14 @@ class AuthManager {
         }
     }
 
-    // Sign up new user
+    // Sign up new user with improved error handling
     async signUp(email, password, userData = {}) {
         try {
-            const response = await fetch(`${supabase.url}/auth/v1/signup`, {
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'apikey': supabase.key
+                    'apikey': SUPABASE_ANON_KEY
                 },
                 body: JSON.stringify({
                     email,
@@ -64,14 +64,14 @@ class AuthManager {
         }
     }
 
-    // Sign in existing user
+    // Sign in existing user with better profile handling
     async signIn(email, password) {
         try {
-            const response = await fetch(`${supabase.url}/auth/v1/token?grant_type=password`, {
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'apikey': supabase.key
+                    'apikey': SUPABASE_ANON_KEY
                 },
                 body: JSON.stringify({
                     email,
@@ -109,11 +109,11 @@ class AuthManager {
             const token = localStorage.getItem('sb_access_token');
             
             if (token) {
-                await fetch(`${supabase.url}/auth/v1/logout`, {
+                await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'apikey': supabase.key
+                        'apikey': SUPABASE_ANON_KEY
                     }
                 });
             }
@@ -121,26 +121,20 @@ class AuthManager {
             console.error('Sign out error:', error);
         } finally {
             // Clear local storage regardless of API call result
-            localStorage.removeItem('sb_access_token');
-            localStorage.removeItem('sb_user');
-            localStorage.removeItem('user_profile');
-            
-            this.currentUser = null;
-            this.userProfile = null;
-            
+            this.clearAuthData();
             this.notifyAuthListeners('signed_out');
         }
     }
 
-    // Fetch user profile from database
+    // Fetch user profile from database with better error handling
     async fetchUserProfile(userId) {
         try {
             const token = localStorage.getItem('sb_access_token');
             
-            const response = await fetch(`${supabase.url}/rest/v1/user_profiles?id=eq.${userId}`, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_profiles?id=eq.${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'apikey': supabase.key,
+                    'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json'
                 }
             });
@@ -150,6 +144,17 @@ class AuthManager {
             if (profiles && profiles.length > 0) {
                 this.userProfile = profiles[0];
                 localStorage.setItem('user_profile', JSON.stringify(this.userProfile));
+            } else {
+                // Profile doesn't exist, create a basic one
+                console.warn('User profile not found, creating basic profile');
+                const basicProfile = {
+                    id: userId,
+                    name: this.currentUser.user_metadata?.name || 'User',
+                    user_type: this.currentUser.user_metadata?.user_type || 'vendor',
+                    phone: '',
+                    is_active: true
+                };
+                await this.createUserProfile(basicProfile);
             }
 
             return this.userProfile;
@@ -159,25 +164,34 @@ class AuthManager {
         }
     }
 
-    // Create user profile in database
+    // Create user profile in database with better error handling
     async createUserProfile(profileData) {
         try {
             const token = localStorage.getItem('sb_access_token');
             
-            const response = await fetch(`${supabase.url}/rest/v1/user_profiles`, {
+            console.log('Creating user profile:', profileData);
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_profiles`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'apikey': supabase.key,
+                    'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json',
                     'Prefer': 'return=representation'
                 },
                 body: JSON.stringify(profileData)
             });
 
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Profile creation failed:', response.status, errorData);
+                throw new Error(`Profile creation failed: ${response.status}`);
+            }
+
             const result = await response.json();
+            console.log('Profile creation result:', result);
             
-            if (response.ok && result.length > 0) {
+            if (result && result.length > 0) {
                 this.userProfile = result[0];
                 localStorage.setItem('user_profile', JSON.stringify(this.userProfile));
             }
@@ -194,11 +208,11 @@ class AuthManager {
         try {
             const token = localStorage.getItem('sb_access_token');
             
-            const response = await fetch(`${supabase.url}/rest/v1/user_profiles?id=eq.${this.currentUser.id}`, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_profiles?id=eq.${this.currentUser.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'apikey': supabase.key,
+                    'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json',
                     'Prefer': 'return=representation'
                 },
@@ -215,59 +229,6 @@ class AuthManager {
             return result;
         } catch (error) {
             console.error('Error updating user profile:', error);
-            throw error;
-        }
-    }
-
-    // Reset password
-    async resetPassword(email) {
-        try {
-            const response = await fetch(`${supabase.url}/auth/v1/recover`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': supabase.key
-                },
-                body: JSON.stringify({ email })
-            });
-
-            const result = await response.json();
-            
-            if (result.error) {
-                throw new Error(result.error.message || 'Password reset failed');
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Password reset error:', error);
-            throw error;
-        }
-    }
-
-    // Update password
-    async updatePassword(newPassword) {
-        try {
-            const token = localStorage.getItem('sb_access_token');
-            
-            const response = await fetch(`${supabase.url}/auth/v1/user`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'apikey': supabase.key
-                },
-                body: JSON.stringify({ password: newPassword })
-            });
-
-            const result = await response.json();
-            
-            if (result.error) {
-                throw new Error(result.error.message || 'Password update failed');
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Password update error:', error);
             throw error;
         }
     }
@@ -302,38 +263,6 @@ class AuthManager {
         return localStorage.getItem('sb_access_token');
     }
 
-    // Verify token validity
-    async verifyToken() {
-        try {
-            const token = localStorage.getItem('sb_access_token');
-            
-            if (!token) {
-                return false;
-            }
-
-            const response = await fetch(`${supabase.url}/auth/v1/user`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'apikey': supabase.key
-                }
-            });
-
-            if (response.ok) {
-                const user = await response.json();
-                this.currentUser = user;
-                localStorage.setItem('sb_user', JSON.stringify(user));
-                return true;
-            } else {
-                this.signOut();
-                return false;
-            }
-        } catch (error) {
-            console.error('Token verification error:', error);
-            this.signOut();
-            return false;
-        }
-    }
-
     // Add authentication state listener
     onAuthStateChange(callback) {
         this.authListeners.push(callback);
@@ -358,48 +287,18 @@ class AuthManager {
         });
     }
 
-    // Refresh session
-    async refreshSession() {
-        try {
-            const refreshToken = localStorage.getItem('sb_refresh_token');
-            
-            if (!refreshToken) {
-                throw new Error('No refresh token available');
-            }
-
-            const response = await fetch(`${supabase.url}/auth/v1/token?grant_type=refresh_token`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': supabase.key
-                },
-                body: JSON.stringify({
-                    refresh_token: refreshToken
-                })
-            });
-
-            const result = await response.json();
-            
-            if (result.error) {
-                throw new Error(result.error.message);
-            }
-
-            if (result.access_token) {
-                localStorage.setItem('sb_access_token', result.access_token);
-                if (result.refresh_token) {
-                    localStorage.setItem('sb_refresh_token', result.refresh_token);
-                }
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Session refresh error:', error);
-            this.signOut();
-            throw error;
-        }
+    // Clear all auth data
+    clearAuthData() {
+        localStorage.removeItem('sb_access_token');
+        localStorage.removeItem('sb_refresh_token');
+        localStorage.removeItem('sb_user');
+        localStorage.removeItem('user_profile');
+        
+        this.currentUser = null;
+        this.userProfile = null;
     }
 
-    // Validate user input
+    // Validation methods
     validateEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -412,50 +311,6 @@ class AuthManager {
     validatePhone(phone) {
         const phoneRegex = /^[6-9]\d{9}$/;
         return phoneRegex.test(phone);
-    }
-
-    // Route guards
-    requireAuth(redirectPath = '/index.html') {
-        if (!this.isAuthenticated()) {
-            window.location.href = redirectPath;
-            return false;
-        }
-        return true;
-    }
-
-    requireVendor(redirectPath = '/vendor-login.html') {
-        if (!this.requireAuth(redirectPath)) {
-            return false;
-        }
-        
-        if (!this.isVendor()) {
-            window.location.href = redirectPath;
-            return false;
-        }
-        return true;
-    }
-
-    requireSupplier(redirectPath = '/supplier-login.html') {
-        if (!this.requireAuth(redirectPath)) {
-            return false;
-        }
-        
-        if (!this.isSupplier()) {
-            window.location.href = redirectPath;
-            return false;
-        }
-        return true;
-    }
-
-    // Clear all auth data
-    clearAuthData() {
-        localStorage.removeItem('sb_access_token');
-        localStorage.removeItem('sb_refresh_token');
-        localStorage.removeItem('sb_user');
-        localStorage.removeItem('user_profile');
-        
-        this.currentUser = null;
-        this.userProfile = null;
     }
 }
 
@@ -480,8 +335,8 @@ class AuthFormHandlers {
             
             try {
                 // Show loading state
-                buttonText.classList.add('hidden');
-                spinner.classList.remove('hidden');
+                if (buttonText) buttonText.classList.add('hidden');
+                if (spinner) spinner.classList.remove('hidden');
                 submitButton.disabled = true;
                 
                 // Validate input
@@ -496,7 +351,11 @@ class AuthFormHandlers {
                 // Sign in
                 await this.auth.signIn(email, password);
                 
-                // Check if user is vendor
+                // Check if user profile exists and is vendor
+                if (!this.auth.getUserProfile()) {
+                    throw new Error('User profile not found. Please contact support.');
+                }
+                
                 if (!this.auth.isVendor()) {
                     throw new Error('Invalid vendor account. Please check your credentials.');
                 }
@@ -508,8 +367,8 @@ class AuthFormHandlers {
                 this.showError(error.message);
             } finally {
                 // Reset loading state
-                buttonText.classList.remove('hidden');
-                spinner.classList.add('hidden');
+                if (buttonText) buttonText.classList.remove('hidden');
+                if (spinner) spinner.classList.add('hidden');
                 submitButton.disabled = false;
             }
         });
@@ -530,8 +389,8 @@ class AuthFormHandlers {
             
             try {
                 // Show loading state
-                buttonText.classList.add('hidden');
-                spinner.classList.remove('hidden');
+                if (buttonText) buttonText.classList.add('hidden');
+                if (spinner) spinner.classList.remove('hidden');
                 submitButton.disabled = true;
                 
                 // Validate input
@@ -546,7 +405,11 @@ class AuthFormHandlers {
                 // Sign in
                 await this.auth.signIn(email, password);
                 
-                // Check if user is supplier
+                // Check if user profile exists and is supplier
+                if (!this.auth.getUserProfile()) {
+                    throw new Error('User profile not found. Please contact support.');
+                }
+                
                 if (!this.auth.isSupplier()) {
                     throw new Error('Invalid supplier account. Please check your credentials.');
                 }
@@ -558,14 +421,14 @@ class AuthFormHandlers {
                 this.showError(error.message);
             } finally {
                 // Reset loading state
-                buttonText.classList.remove('hidden');
-                spinner.classList.add('hidden');
+                if (buttonText) buttonText.classList.remove('hidden');
+                if (spinner) spinner.classList.add('hidden');
                 submitButton.disabled = false;
             }
         });
     }
 
-    // Handle registration form
+    // Handle registration form with improved profile creation
     handleRegistration(formElement) {
         formElement.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -580,8 +443,8 @@ class AuthFormHandlers {
             
             try {
                 // Show loading state
-                buttonText.classList.add('hidden');
-                spinner.classList.remove('hidden');
+                if (buttonText) buttonText.classList.add('hidden');
+                if (spinner) spinner.classList.remove('hidden');
                 submitButton.disabled = true;
                 
                 // Validate passwords match
@@ -602,8 +465,8 @@ class AuthFormHandlers {
                 
                 // Validate phone
                 const phone = formData.get('phone');
-                if (!this.auth.validatePhone(phone)) {
-                    throw new Error('Please enter a valid 10-digit phone number');
+                if (phone && !this.auth.validatePhone(phone)) {
+                    throw new Error('Please enter a valid 10-digit phone number starting with 6-9');
                 }
                 
                 // Sign up user
@@ -612,26 +475,29 @@ class AuthFormHandlers {
                     user_type: formData.get('userType')
                 };
                 
+                console.log('Signing up user with data:', userData);
                 const result = await this.auth.signUp(email, password, userData);
                 
-                // Create user profile
+                // Create user profile immediately after signup
                 if (result.user) {
                     const profileData = {
                         id: result.user.id,
-                        name: formData.get('name'),
-                        user_type: formData.get('userType'),
-                        phone: phone,
+                        name: formData.get('name') || 'User',
+                        user_type: formData.get('userType') || 'vendor',
+                        phone: formData.get('phone') || '',
                         business_name: formData.get('businessName') || null,
-                        address_street: formData.get('street'),
-                        address_city: formData.get('city'),
-                        address_state: formData.get('state'),
-                        address_pincode: formData.get('pincode')
+                        address_street: formData.get('street') || null,
+                        address_city: formData.get('city') || null,
+                        address_state: formData.get('state') || null,
+                        address_pincode: formData.get('pincode') || null,
+                        is_active: true
                     };
                     
+                    console.log('Creating profile with data:', profileData);
                     await this.auth.createUserProfile(profileData);
                 }
                 
-                this.showSuccess('Registration successful! Please check your email to verify your account.');
+                this.showSuccess('Registration successful! You can now log in to your account.');
                 
                 // Redirect after delay
                 setTimeout(() => {
@@ -644,11 +510,12 @@ class AuthFormHandlers {
                 }, 2000);
                 
             } catch (error) {
+                console.error('Registration error:', error);
                 this.showError(error.message);
             } finally {
                 // Reset loading state
-                buttonText.classList.remove('hidden');
-                spinner.classList.add('hidden');
+                if (buttonText) buttonText.classList.remove('hidden');
+                if (spinner) spinner.classList.add('hidden');
                 submitButton.disabled = false;
             }
         });
