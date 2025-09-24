@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/animations.js" defer></script>
+
 </head>
 <body>
     <nav class="dashboard-nav">
@@ -15,30 +16,30 @@
         </div>
         <div class="nav-user">
             <span id="userName">Loading...</span>
-            <button id="logoutBtn" class="btn btn-outline hover-lift">Logout</button>
+            <button id="logoutBtn" class="btn btn-outline">Logout</button>
         </div>
     </nav>
 
     <div class="dashboard-container">
-        <aside class="sidebar animate-on-scroll">
+        <aside class="sidebar">
             <div class="sidebar-menu">
-                <button class="menu-item active hover-lift" data-tab="overview">
+                <button class="menu-item active" data-tab="overview">
                     <span class="menu-icon">📊</span>
                     Overview
                 </button>
-                <button class="menu-item hover-lift" data-tab="inventory">
+                <button class="menu-item" data-tab="inventory">
                     <span class="menu-icon">📦</span>
                     Inventory
                 </button>
-                <button class="menu-item hover-lift" data-tab="orders">
+                <button class="menu-item" data-tab="orders">
                     <span class="menu-icon">📋</span>
                     Orders <span id="ordersCount" class="orders-count">0</span>
                 </button>
-                <button class="menu-item hover-lift" data-tab="add-item">
+                <button class="menu-item" data-tab="add-item">
                     <span class="menu-icon">➕</span>
                     Add Item
                 </button>
-                <button class="menu-item hover-lift" data-tab="profile">
+                <button class="menu-item" data-tab="profile">
                     <span class="menu-icon">👤</span>
                     Profile
                 </button>
@@ -48,34 +49,34 @@
         <main class="main-content">
             <!-- Overview Tab -->
             <div id="overviewTab" class="tab-content active">
-                <div class="content-header animate-on-scroll">
+                <div class="content-header">
                     <h1>Dashboard Overview</h1>
                     <p>Welcome back to your supplier dashboard</p>
                 </div>
 
                 <div class="stats-grid">
-                    <div class="stat-card animate-on-scroll hover-lift">
+                    <div class="stat-card">
                         <div class="stat-icon">📦</div>
                         <div class="stat-info">
                             <h3 id="totalItems">0</h3>
                             <p>Total Items</p>
                         </div>
                     </div>
-                    <div class="stat-card animate-on-scroll hover-lift">
+                    <div class="stat-card">
                         <div class="stat-icon">📋</div>
                         <div class="stat-info">
                             <h3 id="pendingOrders">0</h3>
                             <p>Pending Orders</p>
                         </div>
                     </div>
-                    <div class="stat-card animate-on-scroll hover-lift">
+                    <div class="stat-card">
                         <div class="stat-icon">💰</div>
                         <div class="stat-info">
                             <h3 id="totalRevenue">₹0</h3>
                             <p>Total Revenue</p>
                         </div>
                     </div>
-                    <div class="stat-card animate-on-scroll hover-lift">
+                    <div class="stat-card">
                         <div class="stat-icon">✅</div>
                         <div class="stat-info">
                             <h3 id="completedOrders">0</h3>
@@ -84,7 +85,7 @@
                     </div>
                 </div>
 
-                <div class="recent-section animate-on-scroll">
+                <div class="recent-section">
                     <h2>Recent Orders</h2>
                     <div id="recentOrders" class="recent-orders">
                         <!-- Recent orders will be populated here -->
@@ -94,12 +95,12 @@
 
             <!-- Inventory Tab -->
             <div id="inventoryTab" class="tab-content">
-                <div class="content-header animate-on-scroll">
+                <div class="content-header">
                     <h1>Inventory Management</h1>
                     <p>Manage your products and stock levels</p>
                 </div>
 
-                <div class="inventory-controls animate-on-scroll">
+                <div class="inventory-controls">
                     <div class="search-filter">
                         <input type="text" id="inventorySearch" placeholder="Search items...">
                         <select id="categoryFilter">
@@ -121,12 +122,12 @@
 
             <!-- Orders Tab -->
             <div id="ordersTab" class="tab-content">
-                <div class="content-header animate-on-scroll">
+                <div class="content-header">
                     <h1>Order Management</h1>
                     <p>View and manage incoming orders</p>
                 </div>
 
-                <div class="orders-filter animate-on-scroll">
+                <div class="orders-filter">
                     <select id="orderStatusFilter">
                         <option value="">All Orders</option>
                         <option value="pending">Pending</option>
@@ -144,19 +145,19 @@
 
             <!-- Add Item Tab -->
             <div id="add-itemTab" class="tab-content">
-                <div class="content-header animate-on-scroll">
+                <div class="content-header">
                     <h1>Add New Item</h1>
                     <p>Add products to your inventory</p>
                 </div>
 
-                <form id="addItemForm" class="add-item-form animate-on-scroll">
+                <form id="addItemForm" class="add-item-form">
                     <div class="form-row">
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="itemName">Item Name</label>
                             <input type="text" id="itemName" name="name" required>
                         </div>
                         
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="itemCategory">Category</label>
                             <select id="itemCategory" name="category" required>
                                 <option value="">Select Category</option>
@@ -174,12 +175,12 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="itemPrice">Price</label>
                             <input type="number" id="itemPrice" name="price" step="0.01" min="0" required>
                         </div>
                         
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="itemUnit">Unit</label>
                             <select id="itemUnit" name="unit" required>
                                 <option value="kg">Kilogram (kg)</option>
@@ -194,24 +195,24 @@
                         </div>
                     </div>
 
-                    <div class="form-group animate-on-scroll">
+                    <div class="form-group">
                         <label for="itemDescription">Description</label>
                         <textarea id="itemDescription" name="description" rows="3"></textarea>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="stockQuantity">Stock Quantity</label>
                             <input type="number" id="stockQuantity" name="stock_quantity" min="0" value="0">
                         </div>
                         
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="minimumOrder">Minimum Order</label>
                             <input type="number" id="minimumOrder" name="minimum_order" min="1" value="1">
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-large hover-lift animate-on-scroll">
+                    <button type="submit" class="btn btn-primary btn-large">
                         <span id="addItemText">Add Item</span>
                         <span id="addItemSpinner" class="spinner hidden">Adding Item...</span>
                     </button>
@@ -220,30 +221,30 @@
 
             <!-- Profile Tab -->
             <div id="profileTab" class="tab-content">
-                <div class="content-header animate-on-scroll">
+                <div class="content-header">
                     <h1>Profile Settings</h1>
                     <p>Manage your account information</p>
                 </div>
 
-                <form id="profileForm" class="profile-form animate-on-scroll">
+                <form id="profileForm" class="profile-form">
                     <div class="form-row">
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="profileName">Name</label>
                             <input type="text" id="profileName" name="name">
                         </div>
                         
-                        <div class="form-group animate-on-scroll">
+                        <div class="form-group">
                             <label for="profilePhone">Phone</label>
                             <input type="tel" id="profilePhone" name="phone">
                         </div>
                     </div>
 
-                    <div class="form-group animate-on-scroll">
+                    <div class="form-group">
                         <label for="profileBusinessName">Business Name</label>
                         <input type="text" id="profileBusinessName" name="business_name">
                     </div>
 
-                    <div class="address-section animate-on-scroll">
+                    <div class="address-section">
                         <h4>Address</h4>
                         <div class="form-group">
                             <label for="profileStreet">Street Address</label>
@@ -268,7 +269,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary hover-lift animate-on-scroll">Update Profile</button>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
                 </form>
             </div>
         </main>
