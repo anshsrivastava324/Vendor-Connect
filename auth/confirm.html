@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation - Vendor Connect</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Email Confirmation</h1>
+                <p id="confirmationMessage">Confirming your email address...</p>
+            </div>
+            
+            <div id="confirmationResult" class="confirmation-result">
+                <div class="spinner">
+                    <div class="spinner-icon">⏳</div>
+                    <p>Processing...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/supabase-client.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenHash = urlParams.get('token_hash');
+            const type = urlParams.get('type');
+            const redirectTo = urlParams.get('redirect_to');
+
+            const messageEl = document.getElementById('confirmationMessage');
+            const resultEl = document.getElementById('confirmationResult');
+
+            console.log('Token Hash:', tokenHash);
+            console.log('Type:', type);
+            console.log('Redirect To:', redirectTo);
+
+            if (tokenHash && type === 'signup') {
+                try {
+                    // Confirm the email using Supabase auth
+                    const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            token_hash: tokenHash,
+                            type: type
+                        })
+                    });
+
+                    const result = await response.json();
+                    console.log('Verification result:', result);
+
+                    if (response.ok && result.user) {
+                        messageEl.textContent = '✅ Email confirmed successfully!';
+                        resultEl.innerHTML = `
+                            <div class="success-message">
+                                <div class="success-icon">🎉</div>
+                                <h3>Welcome to Vendor Connect!</h3>
+                                <p>Your email has been verified successfully. You can now log in to your account.</p>
+                                <div class="button-group">
+                                    <a href="../vendor-login.html" class="btn btn-primary">Login as Vendor</a>
+                                    <a href="../supplier-login.html" class="btn btn-secondary">Login as Supplier</a>
+                                </div>
+                                <p class="redirect-info">You will be redirected automatically in <span id="countdown">5</span> seconds...</p>
+                            </div>
+                        `;
+
+                        // Countdown and auto-redirect
+                        let seconds = 5;
+                        const countdownEl = document.getElementById('countdown');
+                        const countdownInterval = setInterval(() => {
+                            seconds--;
+                            if (countdownEl) {
+                                countdownEl.textContent = seconds;
+                            }
+                            if (seconds <= 0) {
+                                clearInterval(countdownInterval);
+                                window.location.href = redirectTo || '../vendor-login.html';
+                            }
+                        }, 1000);
+
+                    } else {
+                        throw new Error(result.error?.message || 'Email confirmation failed');
+                    }
+                } catch (error) {
+                    console.error('Confirmation error:', error);
+                    messageEl.textContent = '❌ Email confirmation failed';
+                    resultEl.innerHTML = `
+                        <div class="error-message">
+                            <div class="error-icon">⚠️</div>
+                            <h3>Confirmation Failed</h3>
+                            <p class="error-text">${error.message}</p>
+                            <p>The confirmation link may be expired or invalid.</p>
+                            <div class="button-group">
+                                <a href="../register.html" class="btn btn-primary">Register Again</a>
+                                <a href="../index.html" class="btn btn-secondary">Go Home</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                messageEl.textContent = '❌ Invalid confirmation link';
+                resultEl.innerHTML = `
+                    <div class="error-message">
+                        <div class="error-icon">🚫</div>
+                        <h3>Invalid Link</h3>
+                        <p>This confirmation link is invalid or expired.</p>
+                        <p>Please make sure you clicked the correct link from your email.</p>
+                        <div class="button-group">
+                            <a href="../register.html" class="btn btn-primary">Register Again</a>
+                            <a href="../index.html" class="btn btn-secondary">Go Home</a>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    </script>
+
+    <style>
+        .confirmation-result {
+            text-align: center;
+            padding: 20px;
+            min-height: 200px;
+        }
+        
+        .spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            color: #6b7280;
+        }
+        
+        .spinner-icon {
+            font-size: 2rem;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            color: #059669;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .error-message {
+            color: #dc2626;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .success-icon,
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .success-message h3,
+        .error-message h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .success-message p,
+        .error-message p {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .error-text {
+            font-weight: 500;
+            color: #dc2626 !important;
+        }
+        
+        .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .redirect-info {
+            font-size: 14px;
+            color: #6b7280 !important;
+            margin-top: 15px;
+        }
+        
+        #countdown {
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 200px;
+            }
+        }
+    </style>
+</body>
+</html>
