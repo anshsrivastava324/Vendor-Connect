@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Dashboard - Vendor Connect</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <div class="nav-brand">
+            <h2>Vendor Connect</h2>
+        </div>
+        <div class="nav-user">
+            <span id="userName">Loading...</span>
+            <button id="logoutBtn" class="btn btn-outline">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <button class="menu-item active" data-tab="overview">
+                    <span class="menu-icon">📊</span>
+                    Overview
+                </button>
+                <button class="menu-item" data-tab="inventory">
+                    <span class="menu-icon">📦</span>
+                    Inventory
+                </button>
+                <button class="menu-item" data-tab="orders">
+                    <span class="menu-icon">📋</span>
+                    Orders <span id="ordersCount" class="orders-count">0</span>
+                </button>
+                <button class="menu-item" data-tab="add-item">
+                    <span class="menu-icon">➕</span>
+                    Add Item
+                </button>
+                <button class="menu-item" data-tab="profile">
+                    <span class="menu-icon">👤</span>
+                    Profile
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Overview Tab -->
+            <div id="overviewTab" class="tab-content active">
+                <div class="content-header">
+                    <h1>Dashboard Overview</h1>
+                    <p>Welcome back to your supplier dashboard</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <h3 id="totalItems">0</h3>
+                            <p>Total Items</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-info">
+                            <h3 id="pendingOrders">0</h3>
+                            <p>Pending Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3 id="totalRevenue">₹0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3 id="completedOrders">0</h3>
+                            <p>Completed Orders</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h2>Recent Orders</h2>
+                    <div id="recentOrders" class="recent-orders">
+                        <!-- Recent orders will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Tab -->
+            <div id="inventoryTab" class="tab-content">
+                <div class="content-header">
+                    <h1>Inventory Management</h1>
+                    <p>Manage your products and stock levels</p>
+                </div>
+
+                <div class="inventory-controls">
+                    <div class="search-filter">
+                        <input type="text" id="inventorySearch" placeholder="Search items...">
+                        <select id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="vegetables">Vegetables</option>
+                            <option value="fruits">Fruits</option>
+                            <option value="grains">Grains</option>
+                            <option value="spices">Spices</option>
+                            <option value="dairy">Dairy</option>
+                            <option value="meat">Meat</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="inventoryGrid" class="inventory-grid">
+                    <!-- Inventory items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="ordersTab" class="tab-content">
+                <div class="content-header">
+                    <h1>Order Management</h1>
+                    <p>View and manage incoming orders</p>
+                </div>
+
+                <div class="orders-filter">
+                    <select id="orderStatusFilter">
+                        <option value="">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="ready">Ready</option>
+                        <option value="delivered">Delivered</option>
+                    </select>
+                </div>
+
+                <div id="ordersList" class="orders-list">
+                    <!-- Orders will be populated here -->
+                </div>
+            </div>
+
+            <!-- Add Item Tab -->
+            <div id="add-itemTab" class="tab-content">
+                <div class="content-header">
+                    <h1>Add New Item</h1>
+                    <p>Add products to your inventory</p>
+                </div>
+
+                <form id="addItemForm" class="add-item-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemName">Item Name</label>
+                            <input type="text" id="itemName" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="itemCategory">Category</label>
+                            <select id="itemCategory" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="vegetables">Vegetables</option>
+                                <option value="fruits">Fruits</option>
+                                <option value="grains">Grains</option>
+                                <option value="spices">Spices</option>
+                                <option value="dairy">Dairy</option>
+                                <option value="meat">Meat</option>
+                                <option value="seafood">Seafood</option>
+                                <option value="beverages">Beverages</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemPrice">Price</label>
+                            <input type="number" id="itemPrice" name="price" step="0.01" min="0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="itemUnit">Unit</label>
+                            <select id="itemUnit" name="unit" required>
+                                <option value="kg">Kilogram (kg)</option>
+                                <option value="g">Gram (g)</option>
+                                <option value="piece">Piece</option>
+                                <option value="liter">Liter</option>
+                                <option value="ml">Milliliter (ml)</option>
+                                <option value="dozen">Dozen</option>
+                                <option value="packet">Packet</option>
+                                <option value="box">Box</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemDescription">Description</label>
+                        <textarea id="itemDescription" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stockQuantity">Stock Quantity</label>
+                            <input type="number" id="stockQuantity" name="stock_quantity" min="0" value="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="minimumOrder">Minimum Order</label>
+                            <input type="number" id="minimumOrder" name="minimum_order" min="1" value="1">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <span id="addItemText">Add Item</span>
+                        <span id="addItemSpinner" class="spinner hidden">Adding Item...</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profileTab" class="tab-content">
+                <div class="content-header">
+                    <h1>Profile Settings</h1>
+                    <p>Manage your account information</p>
+                </div>
+
+                <form id="profileForm" class="profile-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="profileName">Name</label>
+                            <input type="text" id="profileName" name="name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profilePhone">Phone</label>
+                            <input type="tel" id="profilePhone" name="phone">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profileBusinessName">Business Name</label>
+                        <input type="text" id="profileBusinessName" name="business_name">
+                    </div>
+
+                    <div class="address-section">
+                        <h4>Address</h4>
+                        <div class="form-group">
+                            <label for="profileStreet">Street Address</label>
+                            <input type="text" id="profileStreet" name="address_street">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileCity">City</label>
+                                <input type="text" id="profileCity" name="address_city">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profileState">State</label>
+                                <input type="text" id="profileState" name="address_state">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profilePincode">Pincode</label>
+                                <input type="text" id="profilePincode" name="address_pincode">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script src="js/supplier.js"></script>
+</body>
+</html>

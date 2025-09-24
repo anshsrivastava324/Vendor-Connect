@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - Vendor Connect</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <div class="nav-brand">
+            <h2>Vendor Connect</h2>
+        </div>
+        <div class="nav-user">
+            <span id="userName">Loading...</span>
+            <button id="logoutBtn" class="btn btn-outline">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <button class="menu-item active" data-tab="search">
+                    <span class="menu-icon">🔍</span>
+                    Search by Dish
+                </button>
+                <button class="menu-item" data-tab="browse">
+                    <span class="menu-icon">📋</span>
+                    Browse Items
+                </button>
+                <button class="menu-item" data-tab="cart">
+                    <span class="menu-icon">🛒</span>
+                    Cart <span id="cartCount" class="cart-count">0</span>
+                </button>
+                <button class="menu-item" data-tab="orders">
+                    <span class="menu-icon">📦</span>
+                    My Orders
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Search Tab -->
+            <div id="searchTab" class="tab-content active">
+                <div class="content-header">
+                    <h1>Search Ingredients by Dish</h1>
+                    <p>Enter any dish name to get a complete list of ingredients</p>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-box">
+                        <input type="text" id="dishInput" placeholder="Enter dish name (e.g., Chicken Curry, Pasta Carbonara)">
+                        <button id="searchBtn" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+
+                <div id="ingredientsResult" class="ingredients-section hidden">
+                    <div class="ingredients-header">
+                        <h3>Ingredients for "<span id="dishName"></span>"</h3>
+                        <button id="addAllBtn" class="btn btn-success" disabled>
+                            Add Selected to Cart (<span id="selectedCount">0</span>)
+                        </button>
+                    </div>
+
+                    <div id="ingredientsList" class="ingredients-grid">
+                        <!-- Ingredients will be populated here -->
+                    </div>
+                </div>
+
+                <div id="searchSpinner" class="spinner-section hidden">
+                    <div class="spinner">Searching ingredients...</div>
+                </div>
+            </div>
+
+            <!-- Browse Tab -->
+            <div id="browseTab" class="tab-content">
+                <div class="content-header">
+                    <h1>Browse Supplier Items</h1>
+                    <p>Explore items from all suppliers</p>
+                </div>
+
+                <div class="filters-section">
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="vegetables">Vegetables</option>
+                        <option value="fruits">Fruits</option>
+                        <option value="grains">Grains</option>
+                        <option value="spices">Spices</option>
+                        <option value="dairy">Dairy</option>
+                        <option value="meat">Meat</option>
+                    </select>
+                </div>
+
+                <div id="itemsGrid" class="items-grid">
+                    <!-- Items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Cart Tab -->
+            <div id="cartTab" class="tab-content">
+                <div class="content-header">
+                    <h1>Shopping Cart</h1>
+                    <p>Review your selected items</p>
+                </div>
+
+                <div id="cartItems" class="cart-section">
+                    <!-- Cart items will be populated here -->
+                </div>
+
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <h3>Total: ₹<span id="cartTotal">0</span></h3>
+                    </div>
+                    <button id="checkoutBtn" class="btn btn-primary btn-large">Place Order</button>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="ordersTab" class="tab-content">
+                <div class="content-header">
+                    <h1>My Orders</h1>
+                    <p>Track your order history</p>
+                </div>
+
+                <div id="ordersList" class="orders-list">
+                    <!-- Orders will be populated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script src="js/vendor.js"></script>
+</body>
+</html>
