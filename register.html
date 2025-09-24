@@ -6,10 +6,11 @@
     <title>Register - Vendor Connect</title>
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/styles.css">
+    <script src="js/animations.js" defer></script>
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-card register-card">
+        <div class="auth-card register-card animate-on-scroll">
             <div class="auth-header">
                 <h1>Join Vendor Connect</h1>
                 <p>Create your account to get started</p>
@@ -17,12 +18,12 @@
 
             <form id="registerForm" class="auth-form">
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group animate-on-scroll">
                         <label for="name">Full Name</label>
                         <input type="text" id="name" name="name" required>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group animate-on-scroll">
                         <label for="userType">Account Type</label>
                         <select id="userType" name="userType" required>
                             <option value="vendor">Vendor (Restaurant/Food Business)</option>
@@ -31,69 +32,69 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group animate-on-scroll">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" required>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group animate-on-scroll">
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required minlength="6">
                         <small>Minimum 6 characters</small>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group animate-on-scroll">
                         <label for="confirmPassword">Confirm Password</label>
                         <input type="password" id="confirmPassword" name="confirmPassword" required>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group animate-on-scroll">
                     <label for="phone">Phone Number</label>
                     <input type="tel" id="phone" name="phone" required>
                 </div>
 
-                <div id="businessNameGroup" class="form-group hidden">
+                <div id="businessNameGroup" class="form-group hidden animate-on-scroll">
                     <label for="businessName">Business Name</label>
                     <input type="text" id="businessName" name="businessName">
                 </div>
 
-                <div class="address-section">
+                <div class="address-section animate-on-scroll">
                     <h4>Address Information</h4>
-                    <div class="form-group">
+                    <div class="form-group animate-on-scroll">
                         <label for="street">Street Address</label>
                         <input type="text" id="street" name="street">
                     </div>
                     
                     <div class="form-row">
-                        <div class="form-group">
+                        <div class="form-group animate-on-scroll">
                             <label for="city">City</label>
                             <input type="text" id="city" name="city">
                         </div>
                         
-                        <div class="form-group">
+                        <div class="form-group animate-on-scroll">
                             <label for="state">State</label>
                             <input type="text" id="state" name="state">
                         </div>
                         
-                        <div class="form-group">
+                        <div class="form-group animate-on-scroll">
                             <label for="pincode">Pincode</label>
                             <input type="text" id="pincode" name="pincode" pattern="[0-9]{6}">
                         </div>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-full">
+                <button type="submit" class="btn btn-primary btn-full hover-lift animate-on-scroll">
                     <span id="registerText">Create Account</span>
                     <span id="registerSpinner" class="spinner hidden">Creating Account...</span>
                 </button>
             </form>
 
-            <div class="auth-links">
+            <div class="auth-links animate-on-scroll">
                 <p>Already have an account? 
-                    <a href="vendor-login.html">Vendor Login</a> | 
-                    <a href="supplier-login.html">Supplier Login</a>
+                    <a href="vendor-login.html" class="hover-lift">Vendor Login</a> | 
+                    <a href="supplier-login.html" class="hover-lift">Supplier Login</a>
                 </p>
             </div>
         </div>
@@ -110,14 +111,20 @@
         const userTypeSelect = document.getElementById('userType');
         const businessNameGroup = document.getElementById('businessNameGroup');
         const businessNameInput = document.getElementById('businessName');
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
 
-        // Show/hide business name field
+        // Show/hide business name field with animation
         userTypeSelect.addEventListener('change', function() {
             if (this.value === 'supplier') {
                 businessNameGroup.classList.remove('hidden');
+                businessNameGroup.style.animation = 'slideInUp 0.3s ease';
                 businessNameInput.required = true;
             } else {
-                businessNameGroup.classList.add('hidden');
+                businessNameGroup.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    businessNameGroup.classList.add('hidden');
+                }, 300);
                 businessNameInput.required = false;
             }
         });
@@ -130,14 +137,19 @@
             const confirmPassword = formData.get('confirmPassword');
 
             if (password !== confirmPassword) {
-                alert('Passwords do not match');
+                showError('Passwords do not match');
                 return;
             }
 
             const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Registering...';
+            const registerText = document.getElementById('registerText');
+            const registerSpinner = document.getElementById('registerSpinner');
+            
+            // Enhanced loading state
+            registerText.classList.add('hidden');
+            registerSpinner.classList.remove('hidden');
             submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
             
             try {
                 const email = formData.get('email');
@@ -231,34 +243,105 @@
                     console.error('Response:', profileText);
                     
                     // Show warning but don't fail completely
-                    alert(`Registration successful but profile creation had issues. You may need to contact support. User ID: ${authResult.user.id}`);
+                    showError(`Registration successful but profile creation had issues. User ID: ${authResult.user.id}. Please contact support.`);
                 } else {
                     console.log('✅ Profile created successfully');
-                    alert('Registration successful! You can now log in.');
+                    showSuccess(`Registration successful! Welcome to Vendor Connect. You can now log in as a ${userType}.`);
+                    
+                    // Clear form
+                    form.reset();
+                    businessNameGroup.classList.add('hidden');
+                    businessNameInput.required = false;
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        if (userType === 'vendor') {
+                            window.location.href = 'vendor-login.html';
+                        } else {
+                            window.location.href = 'supplier-login.html';
+                        }
+                    }, 3000);
                 }
 
                 console.log('=== REGISTRATION DEBUG END ===');
                 
-                // Redirect to login
-                setTimeout(() => {
-                    if (userType === 'vendor') {
-                        window.location.href = 'vendor-login.html';
-                    } else {
-                        window.location.href = 'supplier-login.html';
-                    }
-                }, 2000);
-                
             } catch (error) {
                 console.error('❌ Registration failed:', error);
-                alert(`Registration failed: ${error.message}`);
+                showError(`Registration failed: ${error.message}`);
             } finally {
-                submitBtn.textContent = originalText;
+                // Reset button state
+                registerText.classList.remove('hidden');
+                registerSpinner.classList.add('hidden');
                 submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        });
+
+        // Enhanced error display function
+        function showError(message) {
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.classList.remove('hidden');
+                errorDiv.style.animation = 'slideInRight 0.3s ease';
+                if (successDiv) successDiv.classList.add('hidden');
+            }
+            
+            setTimeout(() => {
+                if (errorDiv) {
+                    errorDiv.style.animation = 'fadeOut 0.3s ease';
+                    setTimeout(() => {
+                        errorDiv.classList.add('hidden');
+                    }, 300);
+                }
+            }, 6000);
+        }
+
+        // Enhanced success display function
+        function showSuccess(message) {
+            if (successDiv) {
+                successDiv.textContent = message;
+                successDiv.classList.remove('hidden');
+                successDiv.style.animation = 'slideInRight 0.3s ease';
+                if (errorDiv) errorDiv.classList.add('hidden');
+            }
+        }
+
+        // Form validation feedback
+        const inputs = form.querySelectorAll('input[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.style.borderColor = 'var(--error-color)';
+                    this.style.animation = 'shake 0.5s ease';
+                } else {
+                    this.style.borderColor = 'var(--success-color)';
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.style.borderColor === 'rgb(239, 68, 68)' || this.style.borderColor === 'var(--error-color)') {
+                    this.style.borderColor = 'var(--gray-200)';
+                }
+            });
+        });
+
+        // Password strength indicator
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+
+        confirmPasswordInput.addEventListener('input', function() {
+            const password = passwordInput.value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.style.borderColor = 'var(--error-color)';
+            } else if (confirmPassword && password === confirmPassword) {
+                this.style.borderColor = 'var(--success-color)';
+            } else {
+                this.style.borderColor = 'var(--gray-200)';
             }
         });
     });
     </script>
-
-
 </body>
 </html>

@@ -6,35 +6,36 @@
     <title>Vendor Login - Vendor Connect</title>
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/styles.css">
+    <script src="js/animations.js" defer></script>
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-card">
+        <div class="auth-card animate-on-scroll">
             <div class="auth-header">
                 <h1>Vendor Login</h1>
                 <p>Access your dashboard to search ingredients and manage orders</p>
             </div>
 
             <form id="vendorLoginForm" class="auth-form">
-                <div class="form-group">
+                <div class="form-group animate-on-scroll">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group animate-on-scroll">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-full">
+                <button type="submit" class="btn btn-primary btn-full hover-lift animate-on-scroll">
                     <span id="loginText">Login as Vendor</span>
                     <span id="loginSpinner" class="spinner hidden">Logging in...</span>
                 </button>
             </form>
 
-            <div class="auth-links">
-                <p>Don't have an account? <a href="register.html">Register here</a></p>
-                <p><a href="supplier-login.html">Login as Supplier</a></p>
+            <div class="auth-links animate-on-scroll">
+                <p>Don't have an account? <a href="register.html" class="hover-lift">Register here</a></p>
+                <p><a href="supplier-login.html" class="hover-lift">Login as Supplier</a></p>
             </div>
         </div>
     </div>
@@ -43,59 +44,5 @@
 
     <script src="js/supabase-client.js"></script>
     <script src="js/auth.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('vendorLoginForm');
-            const errorDiv = document.getElementById('errorMessage');
-            const loginText = document.getElementById('loginText');
-            const loginSpinner = document.getElementById('loginSpinner');
-
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-
-                // Show loading state
-                loginText.classList.add('hidden');
-                loginSpinner.classList.remove('hidden');
-                
-                try {
-                    const result = await supabase.auth.signIn(email, password);
-                    
-                    if (result.error) {
-                        throw new Error(result.error.message);
-                    }
-
-                    // Get user profile
-                    const profile = await supabase.database
-                        .from('user_profiles')
-                        .select()
-                        .eq('id', result.user.id)
-                        .execute();
-
-                    if (profile.length > 0 && profile[0].user_type === 'vendor') {
-                        localStorage.setItem('user_profile', JSON.stringify(profile[0]));
-                        window.location.href = 'vendor-dashboard.html';
-                    } else {
-                        throw new Error('Invalid vendor account');
-                    }
-                } catch (error) {
-                    showError(error.message);
-                } finally {
-                    loginText.classList.remove('hidden');
-                    loginSpinner.classList.add('hidden');
-                }
-            });
-
-            function showError(message) {
-                errorDiv.textContent = message;
-                errorDiv.classList.remove('hidden');
-                setTimeout(() => {
-                    errorDiv.classList.add('hidden');
-                }, 5000);
-            }
-        });
-    </script>
 </body>
 </html>

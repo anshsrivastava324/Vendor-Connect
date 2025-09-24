@@ -6,6 +6,7 @@
     <title>Vendor Dashboard - Vendor Connect</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/styles.css">
+    <script src="js/animations.js" defer></script>
 </head>
 <body>
     <nav class="dashboard-nav">
@@ -14,28 +15,32 @@
         </div>
         <div class="nav-user">
             <span id="userName">Loading...</span>
-            <button id="logoutBtn" class="btn btn-outline">Logout</button>
+            <button id="logoutBtn" class="btn btn-outline hover-lift">Logout</button>
         </div>
     </nav>
 
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <aside class="sidebar animate-on-scroll">
             <div class="sidebar-menu">
-                <button class="menu-item active" data-tab="search">
+                <button class="menu-item active hover-lift" data-tab="search">
                     <span class="menu-icon">🔍</span>
-                    Search by Dish
+                    Ingredient Search
                 </button>
-                <button class="menu-item" data-tab="browse">
-                    <span class="menu-icon">📋</span>
+                <button class="menu-item hover-lift" data-tab="browse">
+                    <span class="menu-icon">🛒</span>
                     Browse Items
                 </button>
-                <button class="menu-item" data-tab="cart">
-                    <span class="menu-icon">🛒</span>
+                <button class="menu-item hover-lift" data-tab="cart">
+                    <span class="menu-icon">🛍️</span>
                     Cart <span id="cartCount" class="cart-count">0</span>
                 </button>
-                <button class="menu-item" data-tab="orders">
-                    <span class="menu-icon">📦</span>
+                <button class="menu-item hover-lift" data-tab="orders">
+                    <span class="menu-icon">📋</span>
                     My Orders
+                </button>
+                <button class="menu-item hover-lift" data-tab="profile">
+                    <span class="menu-icon">👤</span>
+                    Profile
                 </button>
             </div>
         </aside>
@@ -43,44 +48,37 @@
         <main class="main-content">
             <!-- Search Tab -->
             <div id="searchTab" class="tab-content active">
-                <div class="content-header">
-                    <h1>Search Ingredients by Dish</h1>
-                    <p>Enter any dish name to get a complete list of ingredients</p>
+                <div class="content-header animate-on-scroll">
+                    <h1>Ingredient Search</h1>
+                    <p>Search for ingredients by dish name and add them to your cart</p>
                 </div>
 
-                <div class="search-section">
+                <div class="search-section animate-on-scroll">
                     <div class="search-box">
-                        <input type="text" id="dishInput" placeholder="Enter dish name (e.g., Chicken Curry, Pasta Carbonara)">
-                        <button id="searchBtn" class="btn btn-primary">Search</button>
+                        <input type="text" id="dishSearch" placeholder="Enter dish name (e.g., Chicken Curry, Pasta)">
+                        <button id="searchBtn" class="btn btn-primary hover-lift">Search Ingredients</button>
                     </div>
                 </div>
 
-                <div id="ingredientsResult" class="ingredients-section hidden">
-                    <div class="ingredients-header">
-                        <h3>Ingredients for "<span id="dishName"></span>"</h3>
-                        <button id="addAllBtn" class="btn btn-success" disabled>
-                            Add Selected to Cart (<span id="selectedCount">0</span>)
-                        </button>
+                <div id="ingredientsSection" class="ingredients-section hidden">
+                    <div class="ingredients-header animate-on-scroll">
+                        <h3 id="dishName">Ingredients for: </h3>
+                        <button id="addSelectedBtn" class="btn btn-success hover-lift">Add Selected to Cart</button>
                     </div>
-
-                    <div id="ingredientsList" class="ingredients-grid">
+                    <div id="ingredientsGrid" class="ingredients-grid">
                         <!-- Ingredients will be populated here -->
                     </div>
-                </div>
-
-                <div id="searchSpinner" class="spinner-section hidden">
-                    <div class="spinner">Searching ingredients...</div>
                 </div>
             </div>
 
             <!-- Browse Tab -->
             <div id="browseTab" class="tab-content">
-                <div class="content-header">
-                    <h1>Browse Supplier Items</h1>
-                    <p>Explore items from all suppliers</p>
+                <div class="content-header animate-on-scroll">
+                    <h1>Browse Items</h1>
+                    <p>Explore all available items from our suppliers</p>
                 </div>
 
-                <div class="filters-section">
+                <div class="filters-section animate-on-scroll">
                     <select id="categoryFilter">
                         <option value="">All Categories</option>
                         <option value="vegetables">Vegetables</option>
@@ -99,33 +97,82 @@
 
             <!-- Cart Tab -->
             <div id="cartTab" class="tab-content">
-                <div class="content-header">
+                <div class="content-header animate-on-scroll">
                     <h1>Shopping Cart</h1>
-                    <p>Review your selected items</p>
+                    <p>Review your selected items and place your order</p>
                 </div>
 
                 <div id="cartItems" class="cart-section">
                     <!-- Cart items will be populated here -->
                 </div>
 
-                <div class="cart-footer">
+                <div id="cartFooter" class="cart-footer hidden animate-on-scroll">
                     <div class="cart-total">
                         <h3>Total: ₹<span id="cartTotal">0</span></h3>
                     </div>
-                    <button id="checkoutBtn" class="btn btn-primary btn-large">Place Order</button>
+                    <button id="placeOrderBtn" class="btn btn-primary btn-large hover-lift">Place Order</button>
                 </div>
             </div>
 
             <!-- Orders Tab -->
             <div id="ordersTab" class="tab-content">
-                <div class="content-header">
+                <div class="content-header animate-on-scroll">
                     <h1>My Orders</h1>
-                    <p>Track your order history</p>
+                    <p>Track your order history and current orders</p>
                 </div>
 
-                <div id="ordersList" class="orders-list">
+                <div id="ordersList">
                     <!-- Orders will be populated here -->
                 </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profileTab" class="tab-content">
+                <div class="content-header animate-on-scroll">
+                    <h1>Profile Settings</h1>
+                    <p>Manage your account information</p>
+                </div>
+
+                <form id="profileForm" class="profile-form animate-on-scroll">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="profileName">Name</label>
+                            <input type="text" id="profileName" name="name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profilePhone">Phone</label>
+                            <input type="tel" id="profilePhone" name="phone">
+                        </div>
+                    </div>
+
+                    <div class="address-section">
+                        <h4>Address</h4>
+                        <div class="form-group">
+                            <label for="profileStreet">Street Address</label>
+                            <input type="text" id="profileStreet" name="address_street">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileCity">City</label>
+                                <input type="text" id="profileCity" name="address_city">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profileState">State</label>
+                                <input type="text" id="profileState" name="address_state">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profilePincode">Pincode</label>
+                                <input type="text" id="profilePincode" name="address_pincode">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary hover-lift">Update Profile</button>
+                </form>
             </div>
         </main>
     </div>
